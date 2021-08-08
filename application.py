@@ -113,10 +113,14 @@ def accountSettings():
     if request.method == "POST":
         age = request.form.get("age")
         height = request.form.get("height")
-        weight = request.form.get("weight")
+        weight = round(float(request.form.get("weight")), 2)
+
+        #to convert pounds to kgs before entering into database
+        if request.form.get("options") == "pounds":
+            weight = round(float(weight / 2.205), 2)
 
         db.execute("UPDATE information SET age = ?, height = ?, weight = ? WHERE user_id = ?;", age, height, weight, session["user_id"])
-        return "upadted info :3"
+        return redirect("/")
 
     fields = ["age", "weight", "height"]    
     rows = db.execute("SELECT * FROM information WHERE user_id = ?;", session["user_id"])
