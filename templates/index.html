@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %} index {% endblock %}
+
+{% block body %}
+
+<img src = "/static/water.png" class = "indexImg">
+{% if info.waterToDrink %}
+<span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres of water everyday</span><br>
+{% else %}
+<span class = "text-primary myInfoText">Add weight from settings to display</span><br>
+{% endif %}
+
+<img src = "/static/sleep.png" class = "indexImg">
+{% if info.sleepToGet %}
+<span class = "text-primary myInfoText">Sleep {{info.sleepToGet}} </span><br>
+{% else %}
+<span class = "text-primary myInfoText">Add age from settings to display</span><br>
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %} login {% endblock %}
+
+{% block body %}
+<h4 class="display-1">current info.</h4>
+{% for field in fields %}
+{{ field }} : 
+    {% if user[field] %}
+        {{user[field]}}
+            {% if field == "age" %}
+                years old
+
+            {% elif field == "height" %}
+                cm or {{ user[field] | cmToFeet }}
+
+            {% elif field == "weight" %}
+                Kg or {{ user[field] | KgToPounds }}    
+
+            {% endif %}
+            
+    {% else %}
+        Not Added yet
+    {% endif %}
+<br>
+{% endfor %}
+<h4 class="display-1">update account info.</h4>
+<form action="/accountsettings" method="post">
+
+    <div class="form-group">
+        <label for="age">Age:</label>
+        <input autocomplete="off" autofocus class="form-control" name="age" placeholder="age" type="number" value = {{user["age"]}}>
+    </div>  
+
+    <div class="form-group">
+        <label for="weight">Weight:</label>
+        <input class="form-control" name="weight" placeholder="weight" type="number" value = {{user["weight"]}}>
+    </div>
+
+    <div class="form-group">
+        <label for="height">Height:</label>
+        <input class="form-control" name="height" placeholder="height" type="number" value = {{user["height"]}}>
+    </div>
+
+    <button class="btn btn-primary mt-3" type="submit">update info</button>
+</form>
+
+
+{% endblock %}

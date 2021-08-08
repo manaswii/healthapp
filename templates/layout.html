@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link href="/static/styles.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %} {% endblock %}</title>
+    </head>
+
+    <body>
+            <nav class="navbar navbar-expand navbar-dark bg-dark">
+                <div class="container-fluid">
+                  <a class="mt-2 navbar-brand text-info" href="/">
+                    
+                    <tt><h3 class =>Health info</h3> </tt>
+                  </a>
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                  
+                  <div class="collapse navbar-collapse" id="navbarNav">
+                  <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                      <a class="nav-link" href="/">Home</a>
+                    </li>
+                  </ul>
+                  {% if session.user_id %}
+                  <ul class="navbar-nav ms-auto ">
+                    <li class="nav-item">
+                      <a class="nav-link mt-2" href="/accountsettings">Account settings</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link mt-2 text-danger" href="/logout">Log Out</a>
+                    </li>
+                  </ul>
+
+                  {% else %}
+                  <ul class="navbar-nav ms-auto ">
+                    <li class="nav-item">
+                      <a class="nav-link" href="/login"><button type="button" class="btn btn-info">Login</button></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link mt-2" href="/register">Register</a>
+                    </li>
+                  </ul>
+                  {% endif %}
+                </div>
+              </div>
+              </nav>
+        <main class="container p-5">
+          {% block body %}{% endblock %}
+      </main>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    </body>
+    <footer>
+      {% if session.user_id %}
+
+      <center><span style = "color:darkblue; text-align: center;"> you are now logged in  </span> </center>
+
+      {% endif %}
+    </footer>
+</html>

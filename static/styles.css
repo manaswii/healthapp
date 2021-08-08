@@ -1,0 +1,34 @@
+body{
+    background-color: rgb(242, 242, 255);
+}
+
+.form-group{
+    margin-top: 0.5cm;
+}
+
+main .form-control
+{
+    /* Center form controls */
+    display: inline-block;
+
+    /* Override Bootstrap's 100% width for form controls */
+    width: auto;
+}
+main
+{
+    /* Scroll horizontally as needed */
+    overflow-x: auto;
+
+    /* Center contents */
+    text-align: center;
+}
+.indexImg
+{
+    width: 130px;
+    height: 130px;
+    margin-right: 15px;
+}
+.myInfoText{
+    font-size: 20px;
+    font-weight: 500;
+}
