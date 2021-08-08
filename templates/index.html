@@ -4,19 +4,36 @@
 
 {% block body %}
 
+<div class="row align-items-start">
+<div class = "col border border-5">
+    <h5 class="display-5 text-center">Information</h4>
 <img src = "/static/water.png" class = "indexImg">
 {% if info.waterToDrink %}
 <span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres of water everyday</span><br>
 {% else %}
 <span class = "text-primary myInfoText">Add weight from settings to display</span><br>
 {% endif %}
-
+<br>
 <img src = "/static/sleep.png" class = "indexImg">
 {% if info.sleepToGet %}
 <span class = "text-primary myInfoText">Sleep {{info.sleepToGet}} </span><br>
 {% else %}
 <span class = "text-primary myInfoText">Add age from settings to display</span><br>
 {% endif %}
+</div>
+
+<div class = "col border border-5">
+    <h5 class="display-5 text-center">Tracker</h4>
+<form action="/" method="post">
+
+    <div class="form-group">
+        <label for="age">Age:</label>
+        <input autocomplete="off" autofocus class="form-control" name="age" placeholder="age" type="number" value = #>
+    </div>  
+    <button class="btn btn-primary mt-3" type="submit">update info</button>
+</form>
+</div>
+</div>
 
 
 {% endblock %}

@@ -19,8 +19,6 @@ main
     /* Scroll horizontally as needed */
     overflow-x: auto;
 
-    /* Center contents */
-    text-align: center;
 }
 .indexImg
 {
@@ -29,6 +27,9 @@ main
     margin-right: 15px;
 }
 .myInfoText{
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
+}
+.center{
+    text-align: center;
 }
