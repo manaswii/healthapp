@@ -110,12 +110,14 @@ def logout():
 def accountSettings():
     if session.get("user_id") == None:
         return redirect("/login")
+    if session.get("user_id") == None:
+        return redirect("/login")
     if request.method == "POST":
         age = request.form.get("age")
         height = request.form.get("height")
         weight = round(float(request.form.get("weight")), 2)
 
-        #to convert pounds to kgs before entering into database
+        #to convert pounds to kgs before entering into databases
         if request.form.get("options") == "pounds":
             weight = round(float(weight / 2.205), 2)
 
