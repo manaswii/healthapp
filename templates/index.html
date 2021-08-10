@@ -28,12 +28,16 @@
 
     <div class="form-group">
         <label for="age">Glasses of water</label>
-        <input autocomplete="off" autofocus class="form-control" name="glassesOfWater" placeholder="glasses" type="number" value = #>
-    </div> 
+        <input autocomplete="off" class="form-control" name="glassesOfWater" placeholder="glasses" type="number">
+        glasses drank today: {{ glassesOfWater }}
+    </div>
+    
     <div class="form-group">
         <label for="age">Hours of sleep</label>
-        <input autocomplete="off" autofocus class="form-control" name="hoursOfSleep" placeholder="hours" type="number" value = #>
-    </div>  
+        <input autocomplete="off" class="form-control" name="hoursOfSleep" placeholder="hours" type="number">
+        hours slept today: {{ hoursOfSleep }}
+    </div>
+    
     <button class="btn btn-primary mt-3" type="submit">update info</button>
 </form>
 </div>

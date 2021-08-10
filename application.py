@@ -26,16 +26,31 @@ db = SQL("sqlite:///health.db")
 #test
 
 
-@app.route("/")
+@app.route("/", methods = ["GET", "POST"])
 def index():
     if session.get("user_id") == None:
         return redirect("/login")
+
+    if request.method == "POST":
+        glassesOfWater = 0
+        hoursOfSleep = 0
+
+        try:
+            glassesOfWater += int(request.form.get("glassesOfWater"))
+        except:
+            pass
+        try:
+            hoursOfSleep += int(request.form.get("hoursOfSleep"))
+        except:
+            pass
+
+        db.execute("INSERT INTO history (user_id, glasses, sleep) VALUES (?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep)
+        return redirect("/")
 
     rows = db.execute("SELECT * FROM users JOIN information ON users.id = information.user_id WHERE users.id = ?;", session["user_id"])
     weight = rows[0]["weight"]
     height = rows[0]["height"]
     age = rows[0]["age"]
-
 
     try: 
         info = {"waterToDrink" : int(int(weight) * 2 / 3) }
@@ -47,7 +62,14 @@ def index():
     except:
         info["sleepToGet"] = ""
     
-    return render_template("index.html", info = info)
+    rows = db.execute("SELECT * FROM history WHERE user_id = ?;", session["user_id"])
+    glassesOfWater = 0
+    hoursOfSleep = 0
+    for row in rows:
+        glassesOfWater += row["glasses"]
+        hoursOfSleep +=  row["sleep"]
+
+    return render_template("index.html", info = info, glassesOfWater = glassesOfWater, hoursOfSleep = hoursOfSleep)
 
 
 @app.route("/login", methods = ["POST", "GET"])

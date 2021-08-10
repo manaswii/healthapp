@@ -4,7 +4,7 @@ def toLitres(value):
     return f"{value / 33.814:.2f}"
 
 def calculateSleep(age):
-    if age in range (1, 2, 1):
+    if age in range (1, 2):
         return "11 to 14 hours"
     elif age in range (3, 5, 1):
         return "10 to 13 hours"
