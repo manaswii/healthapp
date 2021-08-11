@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %} History {% endblock %}
+
+{% block body %}
+
+<table class="table table-success table-striped">
+    <thead>
+        <tr>
+            <th>Date and Time</th>
+            <th> Glasses drank</th>
+            <th> Hours slept</th>
+        </tr>
+    </thead>
+    {% for row in rows %}
+    <tr>
+        <td> {{row.TRANSACTED}}</td>
+        <td>{{row.glasses}}</td>
+        <td>{{row.sleep}}</td>
+    </tr>
+    {% endfor%}
+  </table>
+
+{% endblock %}
