@@ -18,7 +18,7 @@ def calculateSleep(age):
         return "7 to 8 hours"
 
 def cmToFeet(height):
-    totalInches = int(height) / 2.54
+    totalInches = float(height) / 2.54
 
     feet = int(totalInches / 12)
     inches = totalInches % 12

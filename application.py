@@ -128,16 +128,29 @@ def logout():
     session.clear()
     return redirect("/login")
 
+@app.route("/history")
+def history():
+    if session.get("user_id") == None:
+        return redirect("/login")
+    rows = db.execute("SELECT * FROM history WHERE user_id = ?;", session["user_id"])
+
+    for row in rows:
+        print(row["TRANSACTED"])
+    return render_template("history.html", rows = rows)
+
 @app.route("/accountsettings", methods = ["GET", "POST"])
 def accountSettings():
     if session.get("user_id") == None:
         return redirect("/login")
-    if session.get("user_id") == None:
-        return redirect("/login")
     if request.method == "POST":
         age = request.form.get("age")
-        height = request.form.get("height")
+        
         weight = round(float(request.form.get("weight")), 2)
+        if request.form.get("options2") == "feetAndInches":
+            inches = (12 * int(request.form.get("height"))) + int(request.form.get("inches"))
+            height = inches * 2.54
+        else:
+            height = request.form.get("height")
 
         #to convert pounds to kgs before entering into databases
         if request.form.get("options") == "pounds":
