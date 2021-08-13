@@ -4,12 +4,12 @@
 
 {% block body %}
 
-<div class="row align-items-start">
-<div class = "col border border-5">
-    <h5 class="display-5 text-center">Information</h4>
+<div class="mydiv row align-items-start border border-primary rounded pb-5 pt-5">
+<div class = "col border-end border-primary">
+    <h5 class="display-5 text-center pb-3">Information</h4>
 <img src = "/static/water.png" class = "indexImg">
 {% if info.waterToDrink %}
-<span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres of water everyday</span><br>
+<span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres / {{info.glassesToDrink}} glasses of water everyday</span><br>
 {% else %}
 <span class = "text-primary myInfoText">Add weight from settings to display</span><br>
 {% endif %}
@@ -22,20 +22,28 @@
 {% endif %}
 </div>
 
-<div class = "col border border-5">
-    <h5 class="display-5 text-center">Tracker</h4>
+<div class = "col ">
+    <h5 class="display-5 text-center pb-3">Tracker</h4>
 <form action="/" method="post">
 
     <div class="form-group">
-        <label for="age">Glasses of water</label>
+        <label for="age">Glasses of water:</label>
+        {% if info.waterToDrink %}
         <input autocomplete="off" class="form-control" name="glassesOfWater" placeholder="glasses" type="number">
         glasses drank today: {{ glassesOfWater }}
+        {% else %}
+        Add weight to Track
+        {% endif %}
     </div>
     
     <div class="form-group">
-        <label for="age">Hours of sleep</label>
+        <label for="age">Hours of sleep:</label>
+        {% if info.sleepToGet %}
         <input autocomplete="off" class="form-control" name="hoursOfSleep" placeholder="hours" type="number">
         hours slept today: {{ hoursOfSleep }}
+        {% else %}
+        Add age to Track
+        {% endif %}
     </div>
     
     <button class="btn btn-primary mt-3" type="submit">update info</button>

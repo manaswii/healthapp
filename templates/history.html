@@ -3,6 +3,8 @@
 {% block title %} History {% endblock %}
 
 {% block body %}
+<div class = "mydiv p-5 border border-primary rounded">
+<h6 class="display-6">Today</h6>
 
 <table class="table table-success table-striped">
     <thead>
@@ -12,7 +14,8 @@
             <th> Hours slept</th>
         </tr>
     </thead>
-    {% for row in rows %}
+    
+    {% for row in today %}
     <tr>
         <td> {{row.TRANSACTED}}</td>
         <td>{{row.glasses}}</td>
@@ -21,4 +24,24 @@
     {% endfor%}
   </table>
 
+  <br><br>
+  <h6 class="display-6">Older</h6>
+  <table class="table table-success table-striped">
+    <thead>
+        <tr>
+            <th>Date and Time</th>
+            <th> Glasses drank</th>
+            <th> Hours slept</th>
+        </tr>
+    </thead>
+    
+    {% for row in older %}
+    <tr>
+        <td> {{row.TRANSACTED}}</td>
+        <td>{{row.glasses}}</td>
+        <td>{{row.sleep}}</td>
+    </tr>
+    {% endfor%}
+  </table>
+  </div>
 {% endblock %}

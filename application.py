@@ -53,7 +53,8 @@ def index():
     age = rows[0]["age"]
 
     try: 
-        info = {"waterToDrink" : int(int(weight) * 2 / 3) }
+        info = {"waterToDrink" : int(int(weight) * 2.205 * 2 / 3) }
+        info["glassesToDrink"] = int( info["waterToDrink"] / 8)
     except:
         info = {"waterToDrink" : ""}
     
@@ -62,7 +63,7 @@ def index():
     except:
         info["sleepToGet"] = ""
     
-    rows = db.execute("SELECT * FROM history WHERE user_id = ?;", session["user_id"])
+    rows = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ?", session["user_id"])
     glassesOfWater = 0
     hoursOfSleep = 0
     for row in rows:
@@ -132,11 +133,12 @@ def logout():
 def history():
     if session.get("user_id") == None:
         return redirect("/login")
-    rows = db.execute("SELECT * FROM history WHERE user_id = ?;", session["user_id"])
 
-    for row in rows:
-        print(row["TRANSACTED"])
-    return render_template("history.html", rows = rows)
+
+    today = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
+    older = db.execute("Select * from history where TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
+
+    return render_template("history.html", today = today, older=older)
 
 @app.route("/accountsettings", methods = ["GET", "POST"])
 def accountSettings():
@@ -144,8 +146,12 @@ def accountSettings():
         return redirect("/login")
     if request.method == "POST":
         age = request.form.get("age")
+        try:
+            weight = float(request.form.get("weight"))
+        except:
+            weight = 0
         
-        weight = round(float(request.form.get("weight")), 2)
+        weight = round(float(weight), 2)
         if request.form.get("options2") == "feetAndInches":
             inches = (12 * int(request.form.get("height"))) + int(request.form.get("inches"))
             height = inches * 2.54

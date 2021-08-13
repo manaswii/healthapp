@@ -22,12 +22,18 @@
 
         feet.addEventListener("change", function(){
             msg2.innerHTML = " (feet:)";
-            document.querySelector("#inchesField").disabled = false;
+            // document.querySelector("#inchesField").disabled = false;
+            document.querySelector("#inchesField").classList.toggle("d-none")
+            document.querySelector("#msg3").classList.toggle("d-none")
+
         })
 
         cm.addEventListener("change", function(){
             msg2.innerHTML = " (in cm:)";
-            document.querySelector("#inchesField").disabled = true;
+            // document.querySelector("#inchesField").disabled = true;
+            document.querySelector("#inchesField").classList.toggle("d-none")
+            document.querySelector("#msg3").classList.toggle("d-none")
+            
         })
         
     })
@@ -38,7 +44,7 @@
 {% block title %} login {% endblock %}
 
 {% block body %}
-<div class = "text-center">
+<div class = " mydiv border border-primary p-5 rounded text-center">
 <h4 class="display-1">current info.</h4>
 {% for field in fields %}
 {{ field }} : 
@@ -71,7 +77,7 @@
 
     <div class="form-group">
         <label for="weight">Weight: <span id = "msg1" >(in Kg)</span></label>
-        <input class="form-control" name="weight" placeholder="weight" type="number"  step="any" value = {{user["weight"]}}>
+        <input class="form-control" name="weight" placeholder="weight" type="number" min = "0"  step="any" value = {{user["weight"]}}>
 
         <input type="radio" class="btn-check" name="options" id="option1" autocomplete="off" value = "kg" checked>
         <label class="btn btn-outline-primary" for="option1">Kg</label>
@@ -83,16 +89,16 @@
 
     <div class="form-group">
         <label for="height">Height:<span id = "msg2" > (in cm:)</span></label>
-        <input class="form-control" name="height" placeholder="height" type="number"  step="any" value = {{user["height"]}}>
+        <input class="form-control" name="height" placeholder="height" type="number" min = "0" step="any" value = {{user["height"]}}>
 
-        <span id = "msg3">inches:</span>
-        <input class="form-control" name="inches" placeholder="height" type="number" disabled step="any" id = "inchesField" value = 0>
+        <span id = "msg3" class = "d-none">inches:</span>
+        <input class="form-control d-none" name="inches" placeholder="height" type="number" step="any" max = "11" id = "inchesField" value = 0>
 
         <input type="radio" class="btn-check" name="options2" id="option3" value = "cm" checked>
         <label class="btn btn-outline-primary" for="option3">cm</label>
         
         <input type="radio" class="btn-check" name="options2" id="option4" value = "feetAndInches" autocomplete="off">
-        <label class="btn btn-outline-primary" for="option4">Feet&Inches</label>
+        <label class="btn btn-outline-primary" for="option4">Feet&Inches</label> <br>
 
     </div>
 

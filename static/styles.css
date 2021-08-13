@@ -1,5 +1,6 @@
 body{
     background-color: rgb(242, 242, 255);
+    background-image: url("b2.jpg");
 }
 
 .form-group{
@@ -22,14 +23,18 @@ main
 }
 .indexImg
 {
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     margin-right: 15px;
 }
 .myInfoText{
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
 }
 .center{
     text-align: center;
+}
+
+.mydiv{
+    backdrop-filter: blur(10px);
 }
