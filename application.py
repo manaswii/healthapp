@@ -16,6 +16,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.filters["toLitres"] = toLitres
 app.jinja_env.filters["cmToFeet"] = cmToFeet
 app.jinja_env.filters["KgToPounds"] = KgToPounds
+#app.jinja_env.filters["func1"] = func1
 
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
@@ -136,9 +137,19 @@ def history():
 
 
     today = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
-    older = db.execute("Select * from history where TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
+    older = db.execute("SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') GROUP BY date ORDER BY date DESC;", session["user_id"])
 
     return render_template("history.html", today = today, older=older)
+
+
+@app.route("/moreinfo")
+def moreInfo():
+
+
+    name = request.args.get("index")
+    rows = db.execute("SELECT * FROM history WHERE user_id = ? AND strftime('%d-%m-%Y', TRANSACTED) = ?", session["user_id"], name)
+    return render_template("moreinfo.html", rows = rows, date = name)
+
 
 @app.route("/accountsettings", methods = ["GET", "POST"])
 def accountSettings():

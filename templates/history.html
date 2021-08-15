@@ -25,11 +25,11 @@
   </table>
 
   <br><br>
-  <h6 class="display-6">Older</h6>
+  <h6 class="display-6">Older</h6>(click a date for full info)
   <table class="table table-success table-striped">
     <thead>
         <tr>
-            <th>Date and Time</th>
+            <th>Date </th>
             <th> Glasses drank</th>
             <th> Hours slept</th>
         </tr>
@@ -37,7 +37,9 @@
     
     {% for row in older %}
     <tr>
-        <td> {{row.TRANSACTED}}</td>
+        <td ><form action = "/moreinfo" method ="GET"><input type = "hidden" name = "index" value = {{row.date1}}>
+        <input type="submit" name="submit" value="{{row.date1}}" class="btn btn-success">
+         </form></td>
         <td>{{row.glasses}}</td>
         <td>{{row.sleep}}</td>
     </tr>
