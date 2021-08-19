@@ -6,8 +6,11 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash, check_password_hash
+import requests
 
 from helpers import toLitres, calculateSleep, cmToFeet, KgToPounds
+
+#api_key 6a66cb06a67f67c6941f752cc68c8b50	id 94d5d05f
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -44,6 +47,9 @@ def index():
             hoursOfSleep += int(request.form.get("hoursOfSleep"))
         except:
             pass
+
+        if glassesOfWater == 0 and hoursOfSleep == 0:
+            return redirect("/")
 
         db.execute("INSERT INTO history (user_id, glasses, sleep) VALUES (?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep)
         return redirect("/")
@@ -141,10 +147,37 @@ def history():
 
     return render_template("history.html", today = today, older=older)
 
+@app.route("/searchFood")
+def searchFood():
+      # Contact API
+    try:
+        #api_key 6a66cb06a67f67c6941f752cc68c8b50	id 94d5d05f
+        name = request.args.get("q")
+        #print(name)
+        url = f"https://trackapi.nutritionix.com/v2/search/instant?query={name}"
+        headers = {'x-app-id': '94d5d05f', 'x-app-key': '6a66cb06a67f67c6941f752cc68c8b50', 'x-remote-user-id' : '0'}
+        response = requests.get(url, headers=headers)
+        response = response.json()
+        #print(response["common"][0]["food_name"])
+        #print(type(response["common"][0]["food_name"]))
+        return response
+    except requests.RequestException:
+        return None
+
+    # Parse response
+    try:
+        quote = response.json()
+        return {
+            "name": quote["companyName"],
+            "price": float(quote["latestPrice"]),
+            "symbol": quote["symbol"]
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
+
 
 @app.route("/moreinfo")
 def moreInfo():
-
 
     name = request.args.get("index")
     rows = db.execute("SELECT * FROM history WHERE user_id = ? AND strftime('%d-%m-%Y', TRANSACTED) = ?", session["user_id"], name)
