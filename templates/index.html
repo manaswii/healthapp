@@ -1,8 +1,37 @@
 {% extends "layout.html" %}
 
 {% block title %} index {% endblock %}
+{% block script %}
+
+
+
+{% endblock %}
 
 {% block body %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() { 
+
+        let input = document.querySelector('#searchFood');
+        input.addEventListener('keyup', function(){
+            $.get('/searchFood?q=' + input.value, function(response){
+                
+                var cars = document.querySelector('#cars');
+                var len = cars.options.length;
+                for (let i = 0; i < len; ++i)
+                {
+                    cars.options[i] = null;
+                }
+                
+                for (let i = 0; i < 10; ++i)
+                {
+                    var option = document.createElement('option');
+                    option.text = response["common"][i]["food_name"] + response["common"][i]["nf_calories"];
+                    cars.add(option);
+                }
+            });
+        });
+    });
+</script>
 
 <div class="mydiv row align-items-start border border-primary rounded pb-5 pt-5">
 <div class = "col border-end border-primary">
@@ -45,6 +74,18 @@
         Add age to Track
         {% endif %}
     </div>
+
+        <div class="form-group">
+            <label for="query">search food: </label>
+            <input autocomplete="off" class="form-control" id="searchFood" name="hoursOfSleep" placeholder="hours" type="text">
+    
+        </div>
+        
+        <div class = "form-group">
+        <select name="cars" id="cars">
+          </select>
+        </div>
+
     
     <button class="btn btn-primary mt-3" type="submit">update info</button>
 </form>
