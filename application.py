@@ -8,7 +8,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 from werkzeug.security import check_password_hash, generate_password_hash, check_password_hash
 import requests
 
-from helpers import toLitres, calculateSleep, cmToFeet, KgToPounds
+from helpers import numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds
 
 #api_key ***REMOVED***	id ***REMOVED***
 
@@ -19,6 +19,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.filters["toLitres"] = toLitres
 app.jinja_env.filters["cmToFeet"] = cmToFeet
 app.jinja_env.filters["KgToPounds"] = KgToPounds
+app.jinja_env.filters["numExtraction"] = numExtraction
 #app.jinja_env.filters["func1"] = func1
 
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -38,6 +39,7 @@ def index():
     if request.method == "POST":
         glassesOfWater = 0
         hoursOfSleep = 0
+        calories = 0
 
         try:
             glassesOfWater += int(request.form.get("glassesOfWater"))
@@ -47,17 +49,25 @@ def index():
             hoursOfSleep += int(request.form.get("hoursOfSleep"))
         except:
             pass
-
-        if glassesOfWater == 0 and hoursOfSleep == 0:
+        try:
+            calories += int(float(request.form.get("calories")))
+            print(calories)
+        except:
+            pass
+        
+        if glassesOfWater == 0 and hoursOfSleep == 0 and calories == 0:
+            print("everything is 0??")
+            #print(int(request.form.get("calories")))
             return redirect("/")
 
-        db.execute("INSERT INTO history (user_id, glasses, sleep) VALUES (?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep)
+        db.execute("INSERT INTO history (user_id, glasses, sleep, calories) VALUES (?, ?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep, calories)
         return redirect("/")
 
     rows = db.execute("SELECT * FROM users JOIN information ON users.id = information.user_id WHERE users.id = ?;", session["user_id"])
     weight = rows[0]["weight"]
     height = rows[0]["height"]
     age = rows[0]["age"]
+    gender = rows[0]["gender"]
 
     try: 
         info = {"waterToDrink" : int(int(weight) * 2.205 * 2 / 3) }
@@ -67,6 +77,14 @@ def index():
     
     try:
         info["sleepToGet"] = calculateSleep(age)
+    except:
+        info["sleepToGet"] = ""
+    
+    try:
+        if gender == "Male":
+            info["caloriesToConsume"] = 1.2 * (10 * weight + 6.25 * height - 5 * age + 5)
+        elif gender == "Female":
+            info["caloriesToConsume"] = 1.2 * (10 * weight + 6.25 * height - 5 * age - 161)
     except:
         info["sleepToGet"] = ""
     
@@ -143,7 +161,7 @@ def history():
 
 
     today = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
-    older = db.execute("SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') GROUP BY date ORDER BY date DESC;", session["user_id"])
+    older = db.execute("SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') GROUP BY date ORDER BY date DESC;", session["user_id"])
 
     return render_template("history.html", today = today, older=older)
 
@@ -175,6 +193,26 @@ def searchFood():
     except (KeyError, TypeError, ValueError):
         return None
 
+@app.route("/nutritionInfo")
+def nutritionInfo():
+    try:
+        #api_key ***REMOVED***	id ***REMOVED***
+        name = request.args.get("q")
+        body = {"query": name}
+        url = f"https://trackapi.nutritionix.com/v2/natural/nutrients"
+        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'x-app-id': '***REMOVED***', 'x-app-key': '***REMOVED***', 'x-remote-user-id' : '0' }
+        response = requests.post(url,  headers=headers, data = body)
+        response = response.json()
+        print(type(response))
+        #for key in response.items():
+        #    print(key)
+        print(response["foods"][0]["nf_calories"])
+
+        return response
+    except requests.RequestException:
+        return None
+
+
 
 @app.route("/moreinfo")
 def moreInfo():
@@ -188,7 +226,14 @@ def moreInfo():
 def accountSettings():
     if session.get("user_id") == None:
         return redirect("/login")
+
     if request.method == "POST":
+        gender = request.form.get("gender")
+        genders = ["Male", "Female", ""]
+
+        if gender not in genders:
+            return "grr"
+
         age = request.form.get("age")
         try:
             weight = float(request.form.get("weight"))
@@ -206,9 +251,9 @@ def accountSettings():
         if request.form.get("options") == "pounds":
             weight = round(float(weight / 2.205), 2)
 
-        db.execute("UPDATE information SET age = ?, height = ?, weight = ? WHERE user_id = ?;", age, height, weight, session["user_id"])
-        return redirect("/")
+        db.execute("UPDATE information SET age = ?, height = ?, weight = ?, gender = ? WHERE user_id = ?;", age, height, weight, gender, session["user_id"])
+        return redirect("/accountsettings")
 
-    fields = ["age", "weight", "height"]    
+    fields = ["gender", "age", "weight", "height"]    
     rows = db.execute("SELECT * FROM information WHERE user_id = ?;", session["user_id"])
     return render_template("accountSettings.html", user = rows[0], fields = fields)

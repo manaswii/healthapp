@@ -29,3 +29,9 @@ def KgToPounds(weight):
     
     return f"{weight * 2.205:.2f} pounds"
 
+def numExtraction(string):
+    for i in range(len(string) - 1):
+        if string[i].isnumeric():
+            if string[i + 1].isnumeric():
+                return int((string[i] + string[i + 1]))
+            return int((string[i]))

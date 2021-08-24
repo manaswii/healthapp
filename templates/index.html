@@ -10,13 +10,16 @@
 {% block body %}
 <script>
     document.addEventListener('DOMContentLoaded', function() { 
-
+        let cars = document.querySelector('#cars');
         let input = document.querySelector('#searchFood');
-        input.addEventListener('keyup', function(){
-            $.get('/searchFood?q=' + input.value, function(response){
+        input.addEventListener('keyup', async function(){
+
+                let output = await fetch('/searchFood?q=' + input.value);
+                let response = await output.json();
+                console.log(response);
                 
-                var cars = document.querySelector('#cars');
-                var len = cars.options.length;
+                let len = cars.options.length;
+                
                 for (let i = 0; i < len; ++i)
                 {
                     cars.options[i] = null;
@@ -24,70 +27,123 @@
                 
                 for (let i = 0; i < 10; ++i)
                 {
-                    var option = document.createElement('option');
-                    option.text = response["common"][i]["food_name"] + response["common"][i]["nf_calories"];
+                    let option = document.createElement('option');
+                    option.text = response["common"][i]["food_name"];
                     cars.add(option);
                 }
-            });
         });
     });
+        async function test1(value){
+            let strUser = value;
+            let output = await fetch('/nutritionInfo?q=' + strUser);
+            let response = await output.json();
+            document.querySelector("#calories").value = response["foods"][0]["nf_calories"];
+                
+        };      
 </script>
 
 <div class="mydiv row align-items-start border border-primary rounded pb-5 pt-5">
-<div class = "col border-end border-primary">
+<div class = "col border-end border-primary ms-4">
     <h5 class="display-5 text-center pb-3">Information</h4>
-<img src = "/static/water.png" class = "indexImg">
-{% if info.waterToDrink %}
-<span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres / {{info.glassesToDrink}} glasses of water everyday</span><br>
-{% else %}
-<span class = "text-primary myInfoText">Add weight from settings to display</span><br>
-{% endif %}
+
+<div class = "row">
+    <div class = "col-3">
+
+        <img src = "/static/water.png" class = "indexImg">
+    </div>
+    <div class = "col pt-3">
+
+        {% if info.waterToDrink %}
+        <span class = "text-primary myInfoText">Drink at least {{info.waterToDrink}} ounces/ {{info.waterToDrink | toLitres}} Litres / {{info.glassesToDrink}} glasses of water everyday</span><br>
+        {% else %}
+        <span class = "text-primary myInfoText">Add weight from settings to display</span><br>
+        {% endif %}
+    </div>
+</div>
 <br>
+
+<div class = "row">
+    <div class = "col-3">
 <img src = "/static/sleep.png" class = "indexImg">
+</div>
+<div class = "col pt-3">
 {% if info.sleepToGet %}
 <span class = "text-primary myInfoText">Sleep {{info.sleepToGet}} </span><br>
 {% else %}
 <span class = "text-primary myInfoText">Add age from settings to display</span><br>
 {% endif %}
 </div>
+</div>
+<br>
 
-<div class = "col ">
+<div class = "row">
+    <div class = "col-3">
+<img src = "/static/food.png" class = "indexImg">
+    </div>
+<div class = "col pt-3">
+{% if info.caloriesToConsume %}
+<span class = "text-primary myInfoText"> Consume {{info.caloriesToConsume}} calories to maintain weight (for sedentary lifestyle) </span><br>
+{% else %}
+<span class = "text-primary myInfoText">Add info from settings to display</span><br>
+{% endif %}
+</div>
+</div>
+</div>
+
+<div class = "col ms-4">
     <h5 class="display-5 text-center pb-3">Tracker</h4>
 <form action="/" method="post">
 
     <div class="form-group">
-        <label for="age">Glasses of water:</label>
-        {% if info.waterToDrink %}
+        <label for="glassesOfWater">Glasses of water:</label>
         <input autocomplete="off" class="form-control" name="glassesOfWater" placeholder="glasses" type="number">
         glasses drank today: {{ glassesOfWater }}
-        {% else %}
-        Add weight to Track
+        {% if info.waterToDrink %}
+            {% if glassesOfWater >= info.glassesToDrink %}
+                
+                <img src = "/static/welldone.gif" class = "smallImg">
+            {% else %}
+            <img src = "/static/pensive2.jpg" class = "smallImg">
+            {% endif %}
         {% endif %}
     </div>
     
     <div class="form-group">
         <label for="age">Hours of sleep:</label>
-        {% if info.sleepToGet %}
         <input autocomplete="off" class="form-control" name="hoursOfSleep" placeholder="hours" type="number">
         hours slept today: {{ hoursOfSleep }}
-        {% else %}
-        Add age to Track
+        {% if info.sleepToGet %}
+        {% if hoursOfSleep >= (info.sleepToGet | numExtraction) %}
+        <img src = "/static/welldone.gif" class = "smallImg">
+    {% else %}
+    <img src = "/static/pensive2.jpg" class = "smallImg">
+    {% endif %}
+
         {% endif %}
     </div>
 
         <div class="form-group">
             <label for="query">search food: </label>
-            <input autocomplete="off" class="form-control" id="searchFood" name="hoursOfSleep" placeholder="hours" type="text">
+            <input autocomplete="off" class="form-control" id="searchFood" name="hoursOfSleep" placeholder="enter food name" type="text">
     
         </div>
         
         <div class = "form-group">
-        <select name="cars" id="cars">
+        <select name="cars" id="cars" onchange="test1(this.value)">
           </select>
         </div>
 
+        <div class="form-group">
+            <label for="calories"> enter amount of calories </label>
+            <input autocomplete="off" class="form-control" id="calories" name="calories" placeholder="Enter manually or search food" type="number" step = "any">
     
-    <button class="btn btn-primary mt-3" type="submit">update info</button>
+        </div>
+        
+        <div class = "text-center">
+
+            <button class="btn btn-primary mt-3" type="submit">update info</button>
+
+        </div>
 </form>
 </div>
 </div>
