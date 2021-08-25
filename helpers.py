@@ -1,3 +1,13 @@
+import os
+from re import X
+from cs50 import SQL
+from flask import Flask, flash, redirect, render_template, request, session
+from flask_session import Session
+import requests
+from tempfile import mkdtemp
+from datetime import datetime, timezone
+import pytz
+
 
 def toLitres(value):
 
@@ -35,3 +45,19 @@ def numExtraction(string):
             if string[i + 1].isnumeric():
                 return int((string[i] + string[i + 1]))
             return int((string[i]))
+
+def getTimeZone(query):
+    query = "122.161.78.226"
+    url = f"http://ip-api.com/json/{query}?fields=status,message,timezone,offset,query"
+    response = requests.get(url)
+    response = response.json()   
+    try:
+        return response
+    except:
+        return None
+
+def convertToUserTZ(time: str) -> datetime:
+    dt = datetime.fromisoformat(time).replace(tzinfo=timezone.utc)
+    dt = dt.astimezone(pytz.timezone(session["time_zone_2"]))
+    format = "%d-%m-%Y %H:%M"
+    return dt.strftime(format)
