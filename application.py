@@ -3,12 +3,16 @@ from re import X
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
+import requests
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash, check_password_hash
-import requests
 
-from helpers import numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds
+
+from datetime import datetime
+from pytz import timezone
+
+from helpers import convertToUserTZ, numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds, getTimeZone
 
 #api_key 6a66cb06a67f67c6941f752cc68c8b50	id 94d5d05f
 
@@ -20,7 +24,7 @@ app.jinja_env.filters["toLitres"] = toLitres
 app.jinja_env.filters["cmToFeet"] = cmToFeet
 app.jinja_env.filters["KgToPounds"] = KgToPounds
 app.jinja_env.filters["numExtraction"] = numExtraction
-#app.jinja_env.filters["func1"] = func1
+app.jinja_env.filters["convertToUserTZ"] = convertToUserTZ
 
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
@@ -113,6 +117,17 @@ def login():
             return "incorrect password"
         else:
             session["user_id"] = usernames[0]["id"]
+            tmp = getTimeZone(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+            session["time_zone"] = tmp["timezone"]
+            session["time_zone_2"] = tmp["timezone"]
+            format = "%z"
+            session["time_zone"] = datetime.now(timezone(session["time_zone"])).strftime(format)
+            session["time_zone"] = session["time_zone"][:-2] + ":" + session["time_zone"][-2:]
+            if session["time_zone"][0] == '-':
+                session["time_zone"] = '+' + session["time_zone"][1:]
+            elif session["time_zone"][0] == '+':
+                session["time_zone"] = '-' + session["time_zone"][1:]            
+            print(session["time_zone"])
             return redirect ("/")
 
     return render_template("login.html")
@@ -159,9 +174,9 @@ def history():
     if session.get("user_id") == None:
         return redirect("/login")
 
-
-    today = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ? ORDER BY TRANSACTED DESC", session["user_id"])
-    older = db.execute("SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day') and date('now', 'start of day', '+1 day') GROUP BY date ORDER BY date DESC;", session["user_id"])
+    print(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC;")
+    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
+    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day', '{session['time_zone']}') and date('now', 'start of day', '+1 day', '{session['time_zone']}') GROUP BY date ORDER BY date DESC;", session["user_id"])
 
     return render_template("history.html", today = today, older=older)
 

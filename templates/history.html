@@ -18,7 +18,7 @@
     
     {% for row in today %}
     <tr>
-        <td> {{row.TRANSACTED}}</td>
+        <td> {{row.TRANSACTED | convertToUserTZ}}</td>
         <td>{{row.glasses}}</td>
         <td>{{row.sleep}}</td>
         <td>{{row.calories}}</td>
