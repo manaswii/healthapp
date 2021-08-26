@@ -92,14 +92,16 @@ def index():
     except:
         info["sleepToGet"] = ""
     
-    rows = db.execute("Select * from history where TRANSACTED between date('now', 'start of day') and date('now', 'start of day', '+1 day') AND user_id = ?", session["user_id"])
+    rows = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']}")
     glassesOfWater = 0
     hoursOfSleep = 0
+    caloriesConsumed = 0
     for row in rows:
         glassesOfWater += row["glasses"]
         hoursOfSleep +=  row["sleep"]
+        caloriesConsumed += row["calories"]
 
-    return render_template("index.html", info = info, glassesOfWater = glassesOfWater, hoursOfSleep = hoursOfSleep)
+    return render_template("index.html", info = info, glassesOfWater = glassesOfWater, hoursOfSleep = hoursOfSleep, caloriesConsumed = caloriesConsumed)
 
 
 @app.route("/login", methods = ["POST", "GET"])
@@ -119,15 +121,18 @@ def login():
             session["user_id"] = usernames[0]["id"]
             tmp = getTimeZone(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
             session["time_zone"] = tmp["timezone"]
-            session["time_zone_2"] = tmp["timezone"]
+            session["time_zone_3"] = tmp["timezone"]
             format = "%z"
             session["time_zone"] = datetime.now(timezone(session["time_zone"])).strftime(format)
             session["time_zone"] = session["time_zone"][:-2] + ":" + session["time_zone"][-2:]
+
             if session["time_zone"][0] == '-':
-                session["time_zone"] = '+' + session["time_zone"][1:]
+                session["time_zone_2"] = '+' + session["time_zone"][1:]
             elif session["time_zone"][0] == '+':
-                session["time_zone"] = '-' + session["time_zone"][1:]            
+                session["time_zone_2"] = '-' + session["time_zone"][1:]          
+
             print(session["time_zone"])
+            print(session["time_zone_2"])
             return redirect ("/")
 
     return render_template("login.html")
@@ -175,7 +180,7 @@ def history():
         return redirect("/login")
 
     print(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC;")
-    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
+    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
     older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day', '{session['time_zone']}') and date('now', 'start of day', '+1 day', '{session['time_zone']}') GROUP BY date ORDER BY date DESC;", session["user_id"])
 
     return render_template("history.html", today = today, older=older)
