@@ -20,15 +20,17 @@
                 
                 let len = cars.options.length;
                 
-                for (let i = 0; i < len; ++i)
+                for (let i = 1; i < len; ++i)
                 {
                     cars.options[i] = null;
                 }
                 
-                for (let i = 0; i < 10; ++i)
+                for (let i = 1; i <= 10; ++i)
                 {
                     let option = document.createElement('option');
                     option.text = response["common"][i]["food_name"];
+                    option.style.backgroundImage = "url(response['common'][i]['photo'])";
+                    console.log(response['common'][i]['photo']);
                     cars.add(option);
                 }
         });
@@ -125,18 +127,18 @@
         <div class="form-group">
             <label for="query">search food: </label>
             <input autocomplete="off" class="form-control" id="searchFood" name="hoursOfSleep" placeholder="enter food name" type="text">
-    
         </div>
         
         <div class = "form-group">
-        <select name="cars" id="cars" onchange="test1(this.value)">
+        <select name="cars" class = "form-select " style = "width:auto" id="cars" onchange="test1(this.value)">
+            <option value = '' selected disabled> Click to expand search results</option>
           </select>
         </div>
 
         <div class="form-group">
             <label for="calories"> enter amount of calories </label>
             <input autocomplete="off" class="form-control" id="calories" name="calories" placeholder="Enter manually or search food" type="number" step = "any">
-    
+            <br>calories consumed today in total : {{caloriesConsumed}}
         </div>
         
         <div class = "text-center">
