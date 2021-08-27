@@ -12,9 +12,8 @@ from werkzeug.security import check_password_hash, generate_password_hash, check
 from datetime import datetime
 from pytz import timezone
 
-from helpers import convertToUserTZ, numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds, getTimeZone
+from helpers import convertToUserTZ, numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds, getTimeZone, login_required
 
-#api_key ***REMOVED***	id ***REMOVED***
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -32,19 +31,17 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 db = SQL("sqlite:///health.db")
 
-#test
-
 
 @app.route("/", methods = ["GET", "POST"])
+@login_required
 def index():
-    if session.get("user_id") == None:
-        return redirect("/login")
-
+    #POST request- when a user adds new information to track from the tracker column
     if request.method == "POST":
         glassesOfWater = 0
         hoursOfSleep = 0
         calories = 0
 
+        #getting values they submitted
         try:
             glassesOfWater += int(request.form.get("glassesOfWater"))
         except:
@@ -55,35 +52,38 @@ def index():
             pass
         try:
             calories += int(float(request.form.get("calories")))
-            print(calories)
         except:
             pass
         
+        #if they added nothing and submitted, don't enter the blank information in the database.
         if glassesOfWater == 0 and hoursOfSleep == 0 and calories == 0:
-            print("everything is 0??")
-            #print(int(request.form.get("calories")))
             return redirect("/")
 
+        #entering data in the database.
         db.execute("INSERT INTO history (user_id, glasses, sleep, calories) VALUES (?, ?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep, calories)
         return redirect("/")
 
+    #GET request- to display how much user should sleep etc and also display how many calories etc user has consumed today so far
     rows = db.execute("SELECT * FROM users JOIN information ON users.id = information.user_id WHERE users.id = ?;", session["user_id"])
     weight = rows[0]["weight"]
     height = rows[0]["height"]
     age = rows[0]["age"]
     gender = rows[0]["gender"]
 
+    #calculate water user should drink everyday
     try: 
         info = {"waterToDrink" : int(int(weight) * 2.205 * 2 / 3) }
         info["glassesToDrink"] = int( info["waterToDrink"] / 8)
     except:
         info = {"waterToDrink" : ""}
     
+    #calculate sleep user should get everyday
     try:
         info["sleepToGet"] = calculateSleep(age)
     except:
         info["sleepToGet"] = ""
     
+    #calculate calories user should consume everyday, to maintain weight, for a sedentary life style.
     try:
         if gender == "Male":
             info["caloriesToConsume"] = 1.2 * (10 * weight + 6.25 * height - 5 * age + 5)
@@ -92,6 +92,7 @@ def index():
     except:
         info["sleepToGet"] = ""
     
+    #calculate how much information user has inputted so far today
     rows = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']}")
     glassesOfWater = 0
     hoursOfSleep = 0
@@ -120,12 +121,18 @@ def login():
         else:
             session["user_id"] = usernames[0]["id"]
             tmp = getTimeZone(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-            session["time_zone"] = tmp["timezone"]
-            session["time_zone_3"] = tmp["timezone"]
+            #session[time_zone] will be of the form -> +05:30
+            #session[time_zone_3] will be of the form -> 'IST'
+            #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset)
+            session["time_zone"] = tmp["timezone"] 
+            session["time_zone_3"] = tmp["timezone"] 
             format = "%z"
             session["time_zone"] = datetime.now(timezone(session["time_zone"])).strftime(format)
+
+            #addinng -> : , to the middle to change form from +0530 to +05:30  
             session["time_zone"] = session["time_zone"][:-2] + ":" + session["time_zone"][-2:]
 
+            #operations to set-up session[time_zone_2]
             if session["time_zone"][0] == '-':
                 session["time_zone_2"] = '+' + session["time_zone"][1:]
             elif session["time_zone"][0] == '+':
@@ -158,62 +165,61 @@ def register():
         elif password != confirmPassword:
             return "passwords don't match"
 
-
         hash = generate_password_hash(password)
+
+        #registering(inserting information into the database)
         db.execute("INSERT INTO users (username, hash) VALUES (?, ?);", user, hash)
+
+        #get new user's id
         roww = db.execute("SELECT id FROM users WHERE username = ?", user)
         id = roww[0]["id"]
+
+        #create empty entry for the user in information table
         db.execute("INSERT INTO information (user_id) VALUES (?);", id)
         return redirect("/")
 
     return render_template("register.html")
 
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/login")
 
 @app.route("/history")
+@login_required
 def history():
-    if session.get("user_id") == None:
-        return redirect("/login")
-
-    print(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC;")
-    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
-    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = ? AND TRANSACTED NOT between date('now', 'start of day', '{session['time_zone']}') and date('now', 'start of day', '+1 day', '{session['time_zone']}') GROUP BY date ORDER BY date DESC;", session["user_id"])
-
+    #get details for today only
+    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
+    
+    #older details(not including today), grouped by date
+    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = {session['user_id']} AND TRANSACTED NOT between datetime('now', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone_2']}') AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED) GROUP BY date ORDER BY date DESC;")
     return render_template("history.html", today = today, older=older)
 
+
+# Contact API to display search results in the website index
+#documentation- https://docs.google.com/document/d/1_q-K-ObMTZvO0qUEAxROrN3bwMujwAN25sLHwJzliK0/edit#
 @app.route("/searchFood")
+@login_required
 def searchFood():
-      # Contact API
     try:
         #api_key ***REMOVED***	id ***REMOVED***
         name = request.args.get("q")
-        #print(name)
         url = f"https://trackapi.nutritionix.com/v2/search/instant?query={name}"
         headers = {'x-app-id': '***REMOVED***', 'x-app-key': '***REMOVED***', 'x-remote-user-id' : '0'}
         response = requests.get(url, headers=headers)
         response = response.json()
-        #print(response["common"][0]["food_name"])
-        #print(type(response["common"][0]["food_name"]))
-        return response
     except requests.RequestException:
         return None
 
     # Parse response
     try:
-        quote = response.json()
         return {
-            "name": quote["companyName"],
-            "price": float(quote["latestPrice"]),
-            "symbol": quote["symbol"]
+            "common": response["common"],
+            "branded" : response["branded"]
         }
     except (KeyError, TypeError, ValueError):
         return None
 
-@app.route("/nutritionInfo")
+
+@app.route("/nutritionInfo") #contact api to get the amount of calories in selected option in index
+@login_required
 def nutritionInfo():
     try:
         #api_key ***REMOVED***	id ***REMOVED***
@@ -223,57 +229,62 @@ def nutritionInfo():
         headers = {'Content-Type': 'application/x-www-form-urlencoded', 'x-app-id': '***REMOVED***', 'x-app-key': '***REMOVED***', 'x-remote-user-id' : '0' }
         response = requests.post(url,  headers=headers, data = body)
         response = response.json()
-        print(type(response))
-        #for key in response.items():
-        #    print(key)
-        print(response["foods"][0]["nf_calories"])
-
-        return response
+        return {
+            "calories" : response["foods"][0]["nf_calories"]
+        } 
+            
     except requests.RequestException:
         return None
 
 
-
-@app.route("/moreinfo")
+@app.route("/moreinfo") #route to get history of a particular day
+@login_required
 def moreInfo():
-
-    name = request.args.get("index")
-    rows = db.execute("SELECT * FROM history WHERE user_id = ? AND strftime('%d-%m-%Y', TRANSACTED) = ?", session["user_id"], name)
-    return render_template("moreinfo.html", rows = rows, date = name)
+    date = request.args.get("index")
+    rows = db.execute(f"SELECT * FROM history WHERE user_id = {session['user_id']} AND strftime('%d-%m-%Y', TRANSACTED) = '{date}' AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED)")
+    return render_template("moreinfo.html", rows = rows, date = date)
 
 
 @app.route("/accountsettings", methods = ["GET", "POST"])
+@login_required
 def accountSettings():
-    if session.get("user_id") == None:
-        return redirect("/login")
-
+    #POST request- to add information to the account
     if request.method == "POST":
         gender = request.form.get("gender")
         genders = ["Male", "Female", ""]
 
+        #checking if user entered a valid gender.
         if gender not in genders:
             return "grr"
 
         age = request.form.get("age")
         try:
             weight = float(request.form.get("weight"))
+            weight = round(float(weight), 2)
+            
+            #if weight was entered in pounds, it will be converted to kgs here
+            if request.form.get("options") == "pounds":
+                weight = round(float(weight / 2.205), 2)
         except:
             weight = 0
         
-        weight = round(float(weight), 2)
         if request.form.get("options2") == "feetAndInches":
+            #this executes if height is entered in feet and inches and converts the height to cm
             inches = (12 * int(request.form.get("height"))) + int(request.form.get("inches"))
             height = inches * 2.54
         else:
+            #this executes if height is entered in cms
             height = request.form.get("height")
-
-        #to convert pounds to kgs before entering into databases
-        if request.form.get("options") == "pounds":
-            weight = round(float(weight / 2.205), 2)
 
         db.execute("UPDATE information SET age = ?, height = ?, weight = ?, gender = ? WHERE user_id = ?;", age, height, weight, gender, session["user_id"])
         return redirect("/accountsettings")
 
+    #GET request- to display account's current information
     fields = ["gender", "age", "weight", "height"]    
     rows = db.execute("SELECT * FROM information WHERE user_id = ?;", session["user_id"])
     return render_template("accountSettings.html", user = rows[0], fields = fields)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")

@@ -4,10 +4,18 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 import requests
+from functools import wraps
 from tempfile import mkdtemp
 from datetime import datetime, timezone
 import pytz
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
 
 def toLitres(value):
 

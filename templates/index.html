@@ -28,10 +28,16 @@
                 for (let i = 1; i <= 10; ++i)
                 {
                     let option = document.createElement('option');
-                    option.text = response["common"][i]["food_name"];
-                    option.style.backgroundImage = "url(response['common'][i]['photo'])";
-                    console.log(response['common'][i]['photo']);
-                    cars.add(option);
+                    if (i <= 5)
+                    {
+                        option.text = response["common"][i]["food_name"];
+                        cars.add(option);
+                    }
+                    else
+                    {
+                        option.text = response["branded"][i]["food_name"];
+                        cars.add(option);
+                    }
                 }
         });
     });
@@ -39,7 +45,7 @@
             let strUser = value;
             let output = await fetch('/nutritionInfo?q=' + strUser);
             let response = await output.json();
-            document.querySelector("#calories").value = response["foods"][0]["nf_calories"];
+            document.querySelector("#calories").value = response["calories"];
                 
         };      
 </script>
