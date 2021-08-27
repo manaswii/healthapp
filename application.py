@@ -48,6 +48,8 @@ def index():
             pass
         try:
             hoursOfSleep += int(request.form.get("hoursOfSleep"))
+            if hoursOfSleep > 24:
+                hoursOfSleep = 0
         except:
             pass
         try:
@@ -93,7 +95,7 @@ def index():
         info["sleepToGet"] = ""
     
     #calculate how much information user has inputted so far today
-    rows = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone']}') AND user_id = {session['user_id']}")
+    rows = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']}")
     glassesOfWater = 0
     hoursOfSleep = 0
     caloriesConsumed = 0
@@ -156,10 +158,10 @@ def register():
         
         usernames = db.execute("SELECT username FROM users WHERE username = ?;", user)
 
-        if not user:
-            return "enter a username"
-        elif not password:
-            return "enter a password"
+        if not user or len(user) < 5:
+            return "enter a valid username"
+        elif not password or len(password) < 5:
+            return "enter a valid password"
         elif len(usernames) != 0:
             return "username already exists"
         elif password != confirmPassword:
@@ -180,16 +182,37 @@ def register():
 
     return render_template("register.html")
 
+@app.route("/changePassword", methods = ["GET", "POST"])
+@login_required
+def changePassword():
+    if request.method == "POST":
+        currentPass = request.form.get("currentPass")
+        newPassword = request.form.get("newPassword")
+        confirmNewPassword = request.form.get("confirmNewPassword")
 
+        if newPassword != confirmNewPassword:
+            return "passwords don't match"
+        elif len(newPassword) < 5:
+            return "password must at least be 5 characters long"
+
+        rows = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+
+        if check_password_hash(rows[0]["hash"], currentPass) == True:
+            db.execute("UPDATE users SET hash = ? WHERE id = ?", generate_password_hash(newPassword), session["user_id"])
+            return "password change successful"
+        else:
+            return "incorrect current password"
+
+    return render_template("changePassword.html")
 
 @app.route("/history")
 @login_required
 def history():
     #get details for today only
-    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
+    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
     
     #older details(not including today), grouped by date
-    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = {session['user_id']} AND TRANSACTED NOT between datetime('now', 'start of day', '{session['time_zone_2']}') and datetime('now', 'start of day', '+1 day', '{session['time_zone_2']}') AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED) GROUP BY date ORDER BY date DESC;")
+    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = {session['user_id']} AND TRANSACTED NOT between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED) GROUP BY date ORDER BY date DESC;")
     return render_template("history.html", today = today, older=older)
 
 
