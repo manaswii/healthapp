@@ -53,6 +53,7 @@
 
 {% block body %}
 <div class = " mydiv border border-primary p-5 rounded text-center">
+    
 <h4 class="display-1">current info.</h4>
 {% for field in fields %}
 {{ field }} : 
@@ -121,9 +122,12 @@
         <label class="btn btn-outline-primary" for="option4">Feet&Inches</label> <br>
 
     </div>
-
     <button class="btn btn-primary mt-3" type="submit">update info</button>
 </form>
+    
+<a href = "/changePassword" >
+    <button class = "btn btn-danger float-end"><a href = "/changePassword">Change password</a></button>
+</a>
 </div>
 
 {% endblock %}

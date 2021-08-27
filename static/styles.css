@@ -39,7 +39,14 @@ main
 .center{
     text-align: center;
 }
-
+.myInfoTextSmall{
+    font-size:10px;
+    color:primary;
+}
 .mydiv{
     backdrop-filter: blur(10px);
+}
+a{
+    text-decoration: none;
+    color: aliceblue;
 }
