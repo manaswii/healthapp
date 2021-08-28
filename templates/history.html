@@ -6,7 +6,7 @@
 <div class = "mydiv p-5 border border-primary rounded">
 <h6 class="display-6">Today</h6>
 
-<table class="table table-success table-striped">
+<table class="table table-primary table-striped">
     <thead>
         <tr>
             <th>Date and Time</th>
@@ -27,8 +27,8 @@
   </table>
 
   <br><br>
-  <h6 class="display-6">Older</h6>(click a date for full info)
-  <table class="table table-success table-striped">
+  <h6 class="display-6">Older</h6>(click a date for full Information)
+  <table class="table table-primary table-striped">
     <thead>
         <tr>
             <th>Date </th>
@@ -41,7 +41,7 @@
     {% for row in older %}
     <tr>
         <td ><form action = "/moreinfo" method ="GET"><input type = "hidden" name = "index" value = {{row.date1}}>
-        <input type="submit" name="submit" value="{{row.date1}}" class="btn btn-success">
+        <input type="submit" name="submit" value="{{row.date1}}" class="btn btn-primary">
          </form></td>
         <td>{{row.glasses}}</td>
         <td>{{row.sleep}}</td>
