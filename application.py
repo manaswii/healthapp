@@ -122,7 +122,9 @@ def login():
             return "incorrect password"
         else:
             session["user_id"] = usernames[0]["id"]
-            tmp = getTimeZone(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+            print(request.environ['HTTP_X_FORWARDED_FOR'][0])
+            tmp = getTimeZone(request.environ['HTTP_X_FORWARDED_FOR'][0])
+            #tmp = getTimeZone(request.environ['REMOTE_ADDR'])
             #session[time_zone] will be of the form -> +05:30
             #session[time_zone_3] will be of the form -> 'IST'
             #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset)
@@ -264,6 +266,18 @@ def nutritionInfo():
 @login_required
 def moreInfo():
     date = request.args.get("index")
+
+    #checking if it's a valid date.
+    list = [0, 0]
+    for i in date:
+        if i.isdigit():
+            list[0] += 1
+        elif i == '-':
+            list[1] += 1
+    if len(date) != 10 or list[1] != 2 or list[0] != 8:
+        return "grr"
+    
+
     rows = db.execute(f"SELECT * FROM history WHERE user_id = {session['user_id']} AND strftime('%d-%m-%Y', TRANSACTED) = '{date}' AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED)")
     return render_template("moreinfo.html", rows = rows, date = date)
 

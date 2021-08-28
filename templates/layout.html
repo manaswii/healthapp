@@ -13,16 +13,18 @@
     </head>
 
     <body>
-            <nav class="navbar navbar-expand navbar-dark bg-dark">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
                 <div class="container-fluid">
                   <a class="mt-2 navbar-brand text-info" href="/">
                     
-                    <tt><h3 class =>Health info</h3> </tt>
+                    <tt><h5>Health info</h5> </tt>
                   </a>
                   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                   </button>
                   
+                  
+
                   <div class="collapse navbar-collapse" id="navbarNav">
                   <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
@@ -30,18 +32,18 @@
                     </li>
                   </ul>
                   {% if session.user_id %}
-                  <ul class = "navbar-nav me-auto mb-2">
-                    <li class = "nav-item me-auto">
-                      <a class="nav-link mt-2" href="/history">History</a>
+                  <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                      <a class="nav-link" href="/history">History</a>
                     </li>
                   </ul>
                   <ul class="navbar-nav ms-auto">
                     
                     <li class="nav-item">
-                      <a class="nav-link mt-2" href="/accountsettings">Account settings</a>
+                      <a class="nav-link" href="/accountsettings">Account settings</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link mt-2 text-danger" href="/logout">Log Out</a>
+                      <a class="nav-link text-danger" href="/logout">Log Out</a>
                     </li>
                     
                   </ul>
