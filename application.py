@@ -109,6 +109,9 @@ def index():
 
 @app.route("/login", methods = ["POST", "GET"])
 def login():
+    if session["user_id"]:
+        return redirect("/")
+        
     if request.method == "POST":
         user = request.form.get("username")
         password = request.form.get("password")
