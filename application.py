@@ -119,7 +119,8 @@ def login():
         offSet = request.form.get("offSet")
         usernames = db.execute("SELECT * FROM users WHERE username = ?;", user)
 
-        if len(timeZone) > 15 or len(offSet) > 5:
+        numbers = sum(c.isdigit() for c in offSet)
+        if len(timeZone) > 15 or len(offSet) > 5 or numbers != 4:
             return "grr"
 
         if len(usernames) != 1:
