@@ -130,7 +130,11 @@ def login():
             #tmp = getTimeZone(request.environ['REMOTE_ADDR'])
             #session[time_zone] will be of the form -> +05:30
             #session[time_zone_3] will be of the form -> 'IST'
+<<<<<<< HEAD
             #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset swapped)
+=======
+            #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset is swapped)
+>>>>>>> 3d7e053f5a3da59bc37eb31b1a2d2abe82d5f6a0
             session["time_zone"] = tmp["timezone"] 
             session["time_zone_3"] = tmp["timezone"] 
             format = "%z"
