@@ -1,15 +1,10 @@
 {% extends "layout.html" %}
 
 {% block title %} index {% endblock %}
-{% block script %}
-
-
-
-{% endblock %}
 
 {% block body %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() { 
+    document.addEventListener('DOMContentLoaded', function() {
         let cars = document.querySelector('#cars');
         let input = document.querySelector('#searchFood');
         input.addEventListener('keyup', async function(){

@@ -3,7 +3,16 @@
 {% block title %} Login {% endblock %}
 
 {% block body %}
-<h1 class="display-1">Log in.</h1>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        let offset = new Date().toString().match(/([-\+][0-9]+)\s/)[1];
+        document.querySelector("#timeZone").value = timeZone;
+        document.querySelector("#offSet").value = offset;
+
+    });
+</script>
+<h1 class="display-1">Log in.</h1> 
 <form action="/login" method="post">
     <div class="form-group">
         <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
@@ -12,8 +21,17 @@
     <div class="form-group">
         <input class="form-control" name="password" placeholder="Password" type="password">
     </div>
-
+    
     <button class="btn btn-primary mt-3" type="submit">Log-in</button>
+
+    <div class="form-group">
+        <input class = "form-control d-none" type="text"  name = "timeZone" id= "timeZone">
+    </div>
+
+    <div class = "form-group">
+        <input class = "form-control d-none" type="text"  name = "offSet" id ="offSet">
+    </div>
+
 </form>
 
 

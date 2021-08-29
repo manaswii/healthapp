@@ -115,7 +115,8 @@ def login():
     if request.method == "POST":
         user = request.form.get("username")
         password = request.form.get("password")
-
+        timeZone = request.form.get("timeZone")
+        offSet = request.form.get("offSet")
         usernames = db.execute("SELECT * FROM users WHERE username = ?;", user)
 
         if len(usernames) != 1:
@@ -125,16 +126,13 @@ def login():
             return "incorrect password"
         else:
             session["user_id"] = usernames[0]["id"]
-            print(request.environ['HTTP_X_FORWARDED_FOR'][0])
-            tmp = getTimeZone(request.environ['HTTP_X_FORWARDED_FOR'][0])
+
             #tmp = getTimeZone(request.environ['REMOTE_ADDR'])
             #session[time_zone] will be of the form -> +05:30
             #session[time_zone_3] will be of the form -> 'IST'
             #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset is swapped)
-            session["time_zone"] = tmp["timezone"] 
-            session["time_zone_3"] = tmp["timezone"] 
-            format = "%z"
-            session["time_zone"] = datetime.now(timezone(session["time_zone"])).strftime(format)
+            session["time_zone"] = offSet
+            session["time_zone_3"] = timeZone
 
             #addinng -> : , to the middle to change form from +0530 to +05:30  
             session["time_zone"] = session["time_zone"][:-2] + ":" + session["time_zone"][-2:]
@@ -147,6 +145,7 @@ def login():
 
             print(session["time_zone"])
             print(session["time_zone_2"])
+            print(session["time_zone_3"])
             return redirect ("/")
 
     return render_template("login.html")
