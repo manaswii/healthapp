@@ -10,7 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash, check
 
 
 from datetime import datetime
-from pytz import timezone
+from pytz import timezone, all_timezones
 
 from helpers import convertToUserTZ, numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds, getTimeZone, login_required
 
@@ -120,7 +120,7 @@ def login():
         usernames = db.execute("SELECT * FROM users WHERE username = ?;", user)
 
         numbers = sum(c.isdigit() for c in offSet)
-        if len(timeZone) > 15 or len(offSet) > 5 or numbers != 4:
+        if timeZone not in all_timezones or len(offSet) != 5 or numbers != 4:
             return "grr"
 
         if len(usernames) != 1:
