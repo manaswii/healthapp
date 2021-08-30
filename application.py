@@ -121,7 +121,7 @@ def login():
 
         numbers = sum(c.isdigit() for c in offSet)
         if timeZone not in all_timezones or len(offSet) != 5 or numbers != 4:
-            return "grr"
+            return "time Zone error"
 
         if len(usernames) != 1:
             return "username does not exist"
