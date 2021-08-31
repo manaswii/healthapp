@@ -95,7 +95,8 @@ def index():
         info["sleepToGet"] = ""
     
     #calculate how much information user has inputted so far today
-    rows = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']}")
+    rows = db.execute(f"Select * from history where DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' = CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' AND user_id = {session['user_id']}")
+
     glassesOfWater = 0
     hoursOfSleep = 0
     caloriesConsumed = 0
@@ -217,10 +218,10 @@ def changePassword():
 @login_required
 def history():
     #get details for today only
-    today = db.execute(f"Select * from history where TRANSACTED between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
+    today = db.execute(f"Select *, to_char(TRANSACTED, 'DD-MM-YYYY HH24:MI') as date from history where DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' = CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
     
     #older details(not including today), grouped by date
-    older = db.execute(f"SELECT strftime('%d', TRANSACTED) as date, strftime('%d-%m-%Y', TRANSACTED) as date1, SUM(glasses) as glasses, SUM(sleep) as sleep, SUM(calories) as calories FROM history WHERE user_id = {session['user_id']} AND TRANSACTED NOT between datetime('now', '{session['time_zone']}', 'start of day', '{session['time_zone_2']}') and datetime('now', '{session['time_zone']}', 'start of day', '+1 day', '{session['time_zone_2']}') AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED) GROUP BY date ORDER BY date DESC;")
+    older = db.execute(f"SELECT to_char(TRANSACTED AT TIME ZONE '{session['time_zone_3']}', 'DD-MM-YYYY') AS date,  SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history WHERE user_id = {session['user_id']} AND DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' != CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' GROUP BY date ORDER BY date DESC;")
     return render_template("history.html", today = today, older=older)
 
 
@@ -230,10 +231,11 @@ def history():
 @login_required
 def searchFood():
     try:
-        #api_key ***REMOVED***	id ***REMOVED***
+        api_key = os.environ.get("API_KEY")
+        api_id = os.environ.get("API_ID")
         name = request.args.get("q")
         url = f"https://trackapi.nutritionix.com/v2/search/instant?query={name}"
-        headers = {'x-app-id': '***REMOVED***', 'x-app-key': '***REMOVED***', 'x-remote-user-id' : '0'}
+        headers = {'x-app-id': api_id, 'x-app-key': api_key, 'x-remote-user-id' : session['user_id']}
         response = requests.get(url, headers=headers)
         response = response.json()
     except requests.RequestException:
@@ -284,7 +286,7 @@ def moreInfo():
         return "grr"
     
 
-    rows = db.execute(f"SELECT * FROM history WHERE user_id = {session['user_id']} AND strftime('%d-%m-%Y', TRANSACTED) = '{date}' AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone']}') = strftime('%d-%m-%Y', TRANSACTED) AND strftime('%d-%m-%Y', TRANSACTED, '{session['time_zone_2']}') = strftime('%d-%m-%Y', TRANSACTED)")
+    rows = db.execute(f"SELECT *, to_char(TRANSACTED, 'DD-MM-YYYY HH24:MI') as date1 FROM history WHERE user_id = {session['user_id']} AND to_char(TRANSACTED AT TIME ZONE '{session['time_zone_3']}', 'DD-MM-YYYY') = '{date}'")
     return render_template("moreinfo.html", rows = rows, date = date)
 
 

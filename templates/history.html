@@ -18,7 +18,7 @@
     
     {% for row in today %}
     <tr>
-        <td> {{row.TRANSACTED | convertToUserTZ}}</td>
+        <td> {{row.date | convertToUserTZ}}</td>
         <td>{{row.glasses}}</td>
         <td>{{row.sleep}}</td>
         <td>{{row.calories}}</td>
@@ -40,8 +40,8 @@
     
     {% for row in older %}
     <tr>
-        <td ><form action = "/moreinfo" method ="GET"><input type = "hidden" name = "index" value = {{row.date1}}>
-        <input type="submit" name="submit" value="{{row.date1}}" class="btn btn-primary">
+        <td ><form action = "/moreinfo" method ="GET"><input type = "hidden" name = "index" value = {{row.date}}>
+        <input type="submit" name="submit" value="{{row.date}}" class="btn btn-primary">
          </form></td>
         <td>{{row.glasses}}</td>
         <td>{{row.sleep}}</td>

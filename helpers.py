@@ -64,8 +64,9 @@ def getTimeZone(query):
     except:
         return None
 
-def convertToUserTZ(time: str) -> datetime:
-    dt = datetime.fromisoformat(time).replace(tzinfo=timezone.utc)
+def convertToUserTZ(time):
+    print(time)
+    format = "%I:%M %p"
+    dt = datetime.strptime(time, '%d-%m-%Y %H:%M').replace(tzinfo=timezone.utc)
     dt = dt.astimezone(pytz.timezone(session["time_zone_3"]))
-    format = "%d-%m-%Y %H:%M"
     return dt.strftime(format)
