@@ -234,8 +234,9 @@ def searchFood():
         api_key = os.environ.get("API_KEY")
         api_id = os.environ.get("API_ID")
         name = request.args.get("q")
+        user_id = string(session['user_id'])
         url = f"https://trackapi.nutritionix.com/v2/search/instant?query={name}"
-        headers = {'x-app-id': api_id, 'x-app-key': api_key, 'x-remote-user-id' : session['user_id']}
+        headers = {'x-app-id': api_id, 'x-app-key': api_key, 'x-remote-user-id' : user_id}
         response = requests.get(url, headers=headers)
         response = response.json()
     except requests.RequestException:
