@@ -29,7 +29,8 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-db = SQL(os.getenv("DATABASE_URL"))
+db=SQL("postgres://odhylxkhgbdpwg:a92a411b649492d69a02b2e74f177321f88b44f59396e39e267e61a9092a4fb7@ec2-44-194-112-166.compute-1.amazonaws.com:5432/dedqpstd2trmvh")
+#db = SQL(os.getenv("DATABASE_URL"))
 
 
 @app.route("/", methods = ["GET", "POST"])
