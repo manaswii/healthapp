@@ -29,7 +29,8 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-db = SQL(os.getenv("DATABASE_URL"))
+db = SQL("***REMOVED***")
+#db = SQL(os.getenv("DATABASE_URL"))
 
 
 @app.route("/", methods = ["GET", "POST"])
@@ -117,11 +118,9 @@ def login():
         user = request.form.get("username")
         password = request.form.get("password")
         timeZone = request.form.get("timeZone")
-        offSet = request.form.get("offSet")
         usernames = db.execute("SELECT * FROM users WHERE username = ?;", user)
 
-        numbers = sum(c.isdigit() for c in offSet)
-        if timeZone not in all_timezones or len(offSet) != 5 or numbers != 4:
+        if timeZone not in all_timezones:
             return "time Zone error"
 
         if len(usernames) != 1:
@@ -132,24 +131,8 @@ def login():
         else:
             session["user_id"] = usernames[0]["id"]
 
-            #tmp = getTimeZone(request.environ['REMOTE_ADDR'])
-            #session[time_zone] will be of the form -> +05:30
             #session[time_zone_3] will be of the form -> 'IST'
-            #session[time_zone_2] will be of the form -> -05:30 ( the first symbol of the actual timezone's offset is swapped)
-            session["time_zone"] = offSet
             session["time_zone_3"] = timeZone
-
-            #addinng -> : , to the middle to change form from +0530 to +05:30  
-            session["time_zone"] = session["time_zone"][:-2] + ":" + session["time_zone"][-2:]
-
-            #operations to set-up session[time_zone_2]
-            if session["time_zone"][0] == '-':
-                session["time_zone_2"] = '+' + session["time_zone"][1:]
-            elif session["time_zone"][0] == '+':
-                session["time_zone_2"] = '-' + session["time_zone"][1:]          
-
-            print(session["time_zone"])
-            print(session["time_zone_2"])
             print(session["time_zone_3"])
             return redirect ("/")
 
@@ -191,6 +174,10 @@ def register():
 
     return render_template("register.html")
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
 @app.route("/changePassword", methods = ["GET", "POST"])
 @login_required
 def changePassword():
@@ -221,9 +208,10 @@ def history():
     today = db.execute(f"Select *, to_char(TRANSACTED, 'DD-MM-YYYY HH24:MI') as date from history where DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' = CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
     
     #older details(not including today), grouped by date
-    older = db.execute(f"SELECT to_char(TRANSACTED AT TIME ZONE '{session['time_zone_3']}', 'DD-MM-YYYY') AS date,  SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history WHERE user_id = {session['user_id']} AND DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' != CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' GROUP BY date ORDER BY date DESC;")
+    older = db.execute(f"SELECT to_char(date AT TIME ZONE '{session['time_zone_3']}', 'DD-MM-YYYY') AS date, glasses, sleep, calories FROM (SELECT DATE(history.TRANSACTED) as date, SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history GROUP BY DATE(history.TRANSACTED)) as hist ORDER BY hist.date DESC")
     return render_template("history.html", today = today, older=older)
 
+ 
 
 # Contact API to display search results in the website index
 #documentation- https://docs.google.com/document/d/1_q-K-ObMTZvO0qUEAxROrN3bwMujwAN25sLHwJzliK0/edit#
@@ -233,8 +221,8 @@ def searchFood():
     try:
         api_key = os.environ.get("API_KEY")
         api_id = os.environ.get("API_ID")
-        name = request.args.get("q")
         user_id = str(session['user_id'])
+        name = request.args.get("q")
         url = f"https://trackapi.nutritionix.com/v2/search/instant?query={name}"
         headers = {'x-app-id': api_id, 'x-app-key': api_key, 'x-remote-user-id' : user_id}
         response = requests.get(url, headers=headers)
@@ -256,11 +244,13 @@ def searchFood():
 @login_required
 def nutritionInfo():
     try:
-        #api_key ***REMOVED***	id ***REMOVED***
+        api_key = os.environ.get("API_KEY")
+        api_id = os.environ.get("API_ID")
+        user_id = str(session['user_id'])
         name = request.args.get("q")
         body = {"query": name}
         url = f"https://trackapi.nutritionix.com/v2/natural/nutrients"
-        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'x-app-id': '***REMOVED***', 'x-app-key': '***REMOVED***', 'x-remote-user-id' : '0' }
+        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'x-app-id': api_id, 'x-app-key': api_key, 'x-remote-user-id' : user_id }
         response = requests.post(url,  headers=headers, data = body)
         response = response.json()
         return {
