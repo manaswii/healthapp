@@ -3,21 +3,28 @@
 {% block title %} Register {% endblock %}
 
 {% block body %}
-<h3 class="display-3">Register.</h3>
-<form action="/register" method="post">
-    <div class="form-group">
-        <input autocomplete="off" autofocus class="form-control" name="username"  placeholder="Username" type="text">
-    </div>
-
-    <div class="form-group">
-        <input class="form-control" name="password" placeholder="Password" type="password" autocomplete = "off">
-    </div>
-
-    <div class="form-group">
-        <input class="form-control" name="confirmation" placeholder="confirm Password" type="password" autocomplete = "off">
-    </div>
-    note- username and password must have at least 5 characters.<br>
-    <button class="btn btn-primary mt-3" type="submit">register</button>
-</form>
+<div class = "row p-4 justify-content-center" style= "text-align: center;" >
+    
+    <div class = "col-3 rounded-3">
+    <h3 class="display-3">Register.</h3>
+    <form action="/register" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="username"  placeholder="Username" type="text">
+        </div>
+    
+        <div class="form-group">
+            <input class="form-control" name="password" placeholder="Password" type="password" autocomplete = "off">
+        </div>
+    
+        <div class="form-group">
+            <input class="form-control" name="confirmation" placeholder="confirm Password" type="password" autocomplete = "off">
+        </div>
+        <button class="btn btn-primary mt-3" type="submit">register</button>
+        <hr>
+        note- username and password must have at least 5 characters.
+        <hr>
+    </form>
+</div>
+</div>
 
 {% endblock %}
