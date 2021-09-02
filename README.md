@@ -1,6 +1,6 @@
 # Health Info
 https://infohealth.herokuapp.com/ \
-(for screenshots go to the end of the file)
+(for screenshots go to the end of the README)
 
 ### Idea behind it ###
 The inspiration behind it was to make a single station to healthy living for people,\
@@ -47,10 +47,10 @@ The inspiration behind it was to make a single station to healthy living for peo
 #### Image files ####
 `favicon.ico, food.png, pensive.png, pensive2.png, sleep.png, water.png, welldone.png, welldone.gif`
 # Some screenshots #
-## index.html, (it has the information on the left side and the Tracker on the right side) ##
+### index.html (it has the **information** on the left side and the **Tracker** on the right side) ###
 ![image](https://user-images.githubusercontent.com/85053597/131918599-f4a53422-89a1-4770-95c3-2c63a890a560.png)
-## History section,The older section is grouped by dates. You can click on one of the dates to expand it even further and see when exactly you added what entry. ##
+### History section,The older section is grouped by dates. You can click on one of the dates to expand it even further and see when exactly you added what entry. ###
 ![image](https://user-images.githubusercontent.com/85053597/131920712-881945a8-6d3a-4125-b5fe-1b4a13a67b84.png)
-## History section on a phone ##
-![image](https://user-images.githubusercontent.com/85053597/131920764-6c08e16d-5273-46b3-a198-131e2189bdc0.png)
+### History section on a phone ###
+![image](https://user-images.githubusercontent.com/85053597/131921523-6c49881b-3632-4c91-abab-bd9c0cca5de3.png)
 
