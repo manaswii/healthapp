@@ -1,5 +1,5 @@
 # Health Info
-https://infohealth.herokuapp.com/
+https://infohealth.herokuapp.com/ \
 (for screenshots go to the end of the file)
 
 ### Idea behind it ###
