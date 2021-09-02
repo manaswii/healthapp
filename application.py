@@ -65,7 +65,7 @@ def index():
         flash("Added info", "alert")
         return redirect("/")
 
-    #GET request- to display how much user should sleep etc and also display how many calories etc user has consumed today so far
+    #GET request- to get user deatils to display how much user should sleep etc and also display how many calories etc user should consume
     rows = db.execute("SELECT * FROM users JOIN information ON users.id = information.user_id WHERE users.id = ?;", session["user_id"])
     weight = rows[0]["weight"]
     height = rows[0]["height"]
@@ -95,7 +95,7 @@ def index():
         info["sleepToGet"] = ""
     
     #calculate how much information user has inputted so far today
-    rows = db.execute(f"Select * from history where DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' = CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' AND user_id = {session['user_id']}")
+    rows = db.execute(f"Select * from history where date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') = date(timezone('{session['time_zone_3']}', now())) AND user_id = {session['user_id']}")
 
     glassesOfWater = 0
     hoursOfSleep = 0
