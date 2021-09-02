@@ -31,7 +31,6 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 db = SQL(os.getenv("DATABASE_URL"))
 
-
 @app.route("/", methods = ["GET", "POST"])
 @login_required
 def index():
@@ -63,6 +62,7 @@ def index():
 
         #entering data in the database.
         db.execute("INSERT INTO history (user_id, glasses, sleep, calories) VALUES (?, ?, ?, ?);", session["user_id"], glassesOfWater, hoursOfSleep, calories)
+        flash("Added info", "alert")
         return redirect("/")
 
     #GET request- to display how much user should sleep etc and also display how many calories etc user has consumed today so far
@@ -123,13 +123,14 @@ def login():
             return "time Zone error"
 
         if len(usernames) != 1:
-            return "username does not exist"
-        
+            flash("Username does not exist", "error")
+            return render_template("login.html")
+
         if check_password_hash(usernames[0]["hash"], password) == False:
-            return "incorrect password"
+             flash("Invalid password", "error")
+             return render_template("login.html")
         else:
             session["user_id"] = usernames[0]["id"]
-
             #session[time_zone_3] will be of the form -> 'IST'
             session["time_zone_3"] = timeZone
             print(session["time_zone_3"])
@@ -150,13 +151,20 @@ def register():
         usernames = db.execute("SELECT username FROM users WHERE username = ?;", user)
 
         if not user or len(user) < 5:
-            return "enter a valid username"
+            flash("Enter a valid username", "error")
+            return render_template("register.html")
+
         elif not password or len(password) < 5:
-            return "enter a valid password"
+            flash("Enter a valid password", "error")
+            return render_template("register.html")
+            
         elif len(usernames) != 0:
-            return "username already exists"
+            flash("Username already exists", "error")
+            return render_template("register.html")
+
         elif password != confirmPassword:
-            return "passwords don't match"
+            flash("Passwords don't match", "error")
+            return render_template("register.html")
 
         hash = generate_password_hash(password)
 
@@ -169,6 +177,7 @@ def register():
 
         #create empty entry for the user in information table
         db.execute("INSERT INTO information (user_id) VALUES (?);", id)
+        flash("Account created successfully", "success")
         return redirect("/")
 
     return render_template("register.html")
@@ -186,17 +195,21 @@ def changePassword():
         confirmNewPassword = request.form.get("confirmNewPassword")
 
         if newPassword != confirmNewPassword:
-            return "passwords don't match"
+            flash("New passwords don't match", "error")
+            return render_template("changePassword.html")
         elif len(newPassword) < 5:
-            return "password must at least be 5 characters long"
+            flash("New password must at least be 5 characters long", "error")
+            return render_template("changePassword.html")
 
         rows = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
 
         if check_password_hash(rows[0]["hash"], currentPass) == True:
             db.execute("UPDATE users SET hash = ? WHERE id = ?", generate_password_hash(newPassword), session["user_id"])
-            return "password change successful"
+            flash("Password changed successfully", "success")
+            return redirect("/accountsettings")
         else:
-            return "incorrect current password"
+            flash("Incorrect current password", "error")
+            return render_template("changePassword.html")
 
     return render_template("changePassword.html")
 
@@ -209,7 +222,6 @@ def history():
     #older details(not including today), grouped by date
     older = db.execute(f"SELECT to_char(date , 'DD-MM-YYYY') AS date, glasses, sleep, calories FROM (SELECT date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') as date, SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history WHERE user_id = {session['user_id']} AND DATE(TRANSACTED) AT TIME ZONE '{session['time_zone_3']}' != CURRENT_DATE AT TIME ZONE '{session['time_zone_3']}' GROUP BY date) as hist ORDER BY hist.date DESC")
     return render_template("history.html", today = today, older=older)
-
  
 
 # Contact API to display search results in the website index
@@ -312,6 +324,7 @@ def accountSettings():
             height = request.form.get("height")
 
         db.execute("UPDATE information SET age = ?, height = ?, weight = ?, gender = ? WHERE user_id = ?;", age, height, weight, gender, session["user_id"])
+        flash("Info added successfully", "success")
         return redirect("/accountsettings")
 
     #GET request- to display account's current information

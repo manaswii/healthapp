@@ -13,10 +13,10 @@
         let msg2 = document.querySelector("#msg2");
         let msg1 = document.querySelector("#msg1");
 
-        if ( "{{user["gender"]}}" == "Male"){
+        if ( "{{user['gender']}}" == "Male"){
             gender.value = "Male";
         }
-        else if ( "{{user["gender"]}}" == "Female"){
+        else if ( "{{user['gender']}}" == "Female"){
             gender.value = "Female";
         }
 
@@ -54,7 +54,7 @@
 {% block body %}
 <div class = " mydiv border border-primary p-5 rounded text-center">
     
-<h4 class="display-1">current info.</h4>
+<h4 class="display-1">current info</h4>
 {% for field in fields %}
 {{ field }} : 
     {% if user[field] %}
@@ -77,7 +77,7 @@
     {% endif %}
 <br>
 {% endfor %}
-<h4 class="display-1">update account info.</h4>
+<h4 class="display-1">update account info</h4>
 
 <form action="/accountsettings" method="post">
     
