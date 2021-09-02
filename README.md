@@ -45,8 +45,8 @@ The inspiration behind it was to make a single station to healthy living for peo
 #### CSS ####
 13. `styles.css` - It's the CSS file used for styling throughout.\
 #### Image files ####
-`favicon.ico, food.png, pensive.png, pensive2.png, sleep.png, water.png, welldone.png, welldone.gif`
-# Some screenshots #
+`favicon.ico, food.png, pensive.png, pensive2.png, sleep.png, water.png, welldone.png, welldone.gif`\
+## Some screenshots ##
 ### index.html (it has the **information** on the left side and the **Tracker** on the right side) ###
 ![image](https://user-images.githubusercontent.com/85053597/131918599-f4a53422-89a1-4770-95c3-2c63a890a560.png)
 ### History section,The older section is grouped by dates. You can click on one of the dates to expand it even further and see when exactly you added what entry. ###
