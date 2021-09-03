@@ -14,6 +14,7 @@ https://infohealth.herokuapp.com/ \
 - Hours you slept today
 - Glasses of water you drank today
 - Calories you consumed today
+- Make API calls to get calories present in any food.
 
 ## Usage for main routes ##
 - Home - It displays the information and the tracker itself.
