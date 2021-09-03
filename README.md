@@ -1,10 +1,9 @@
 # Health Info
+#### Video Demo: https://www.youtube.com/watch?v=iuF0hxNXAaU&t=9s&ab_channel=ManaswiSharma
+#### Description: A web app which displays useful health related information such as the number of glasses of water a user should drink everyday and also helps the users track it.
+ 
 https://infohealth.herokuapp.com/ \
 (for screenshots go to the end of the README)
-
-### Idea behind it ###
-The inspiration behind it was to make a single station to healthy living for people,\
-**A web app which displays useful health information to users and also helps them track them.**
 
 ## It displays the following: ##
 - Amount of water you should drink everyday.
