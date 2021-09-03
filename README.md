@@ -16,6 +16,11 @@ The inspiration behind it was to make a single station to healthy living for peo
 - Glasses of water you drank today
 - Calories you consumed today
 
+## Usage for main routes ##
+- Home - It displays the information and the tracker itself.
+- History - It shows entries from previous dates, grouped by dates, dates can be clicked to expand for further info.
+- Account settings - To enter user details such as height and weight.
+
 ## Technologies used ##
 1. Flask for backend
 2. Jinja2 for HTML templating
