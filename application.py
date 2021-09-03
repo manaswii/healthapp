@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import os
 from re import X
 from cs50 import SQL
@@ -14,6 +15,8 @@ from pytz import timezone, all_timezones
 
 from helpers import convertToUserTZ, numExtraction, toLitres, calculateSleep, cmToFeet, KgToPounds, getTimeZone, login_required
 
+load_dotenv()
+
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -29,7 +32,8 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-db = SQL(os.getenv("DATABASE_URL"))
+db = SQL(os.environ.get("DATABASE_URL"))
+
 
 @app.route("/", methods = ["GET", "POST"])
 @login_required
