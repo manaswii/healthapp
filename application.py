@@ -220,7 +220,7 @@ def history():
     today = db.execute(f"Select *, to_char(TRANSACTED, 'DD-MM-YYYY HH24:MI') as date from history where date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') = date(timezone('{session['time_zone_3']}', now())) AND user_id = {session['user_id']} ORDER BY TRANSACTED DESC")
     
     #older details(not including today), grouped by date
-    older = db.execute(f"SELECT to_char(date , 'DD-MM-YYYY') AS date, glasses, sleep, calories FROM (SELECT date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') as date, SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history WHERE user_id = {session['user_id']} AND date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') != date(timezone('{session['time_zone_3']}', now()))' GROUP BY date) as hist ORDER BY hist.date DESC")
+    older = db.execute(f"SELECT to_char(date , 'DD-MM-YYYY') AS date, glasses, sleep, calories FROM (SELECT date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') as date, SUM(glasses) AS glasses, SUM(sleep) AS sleep, SUM(calories) AS calories FROM history WHERE user_id = {session['user_id']} AND date_trunc('day', TRANSACTED AT TIME ZONE '{session['time_zone_3']}') != date(timezone('{session['time_zone_3']}', now())) GROUP BY date) as hist ORDER BY hist.date DESC")
     return render_template("history.html", today = today, older=older)
  
 
